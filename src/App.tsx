@@ -122,10 +122,10 @@ export default function App() {
             exit={{ opacity: 0, y: -20 }}
             className="w-full max-w-4xl text-center"
           >
-            <h1 className="text-9xl font-black mb-4 bg-gradient-to-r from-[#6366F1] to-[#D946EF] bg-clip-text text-transparent py-2 tracking-tighter">
+            <h1 className="text-6xl sm:text-9xl font-black mb-2 bg-gradient-to-r from-[#6366F1] to-[#D946EF] bg-clip-text text-transparent py-2 tracking-tighter">
               Search
             </h1>
-            <p className="text-gray-500 mb-12 text-2xl font-bold tracking-tight">ค้นหาหมายเลข PO</p>
+            <p className="text-gray-500 mb-6 text-xl sm:text-2xl font-bold tracking-tight">ค้นหาหมายเลข PO</p>
             
             <div className="relative group max-w-4xl mx-auto">
               <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
@@ -137,18 +137,18 @@ export default function App() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
                 placeholder="ค้นหา PO เช่น 300xxxxxxxx"
-                className="w-full pl-14 pr-28 py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-2xl font-light"
+                className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
               />
               <button
                 onClick={() => handleSearch(searchQuery)}
                 disabled={loading}
-                className="absolute right-2 top-2 bottom-2 px-8 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[120px] text-xl"
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ค้นหา"}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
               </button>
             </div>
 
-            <div className="relative group max-w-4xl mx-auto mt-10">
+            <div className="relative group max-w-4xl mx-auto mt-4 sm:mt-10">
               <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
                 <Search className="w-5 h-5 text-gray-400" />
               </div>
@@ -158,14 +158,14 @@ export default function App() {
                 onChange={(e) => setEgpSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch(egpSearchQuery)}
                 placeholder="ค้นหาหมายเลขโครงการ e-GP"
-                className="w-full pl-14 pr-28 py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-purple-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-2xl font-light"
+                className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-purple-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
               />
               <button
                 onClick={() => handleSearch(egpSearchQuery)}
                 disabled={loading}
-                className="absolute right-2 top-2 bottom-2 px-8 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[120px] text-xl"
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "ค้นหา"}
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
               </button>
             </div>
             
@@ -185,19 +185,19 @@ export default function App() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-7xl relative flex flex-col items-center min-h-screen py-12 px-4"
+            className="w-full max-w-7xl relative flex flex-col items-center min-h-screen py-4 sm:py-12 px-4"
           >
             <button
               onClick={() => setView("search")}
-              className="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md hover:bg-white rounded-full transition-all text-[#3B82F6] font-bold text-[10px] shadow-md border border-white/40"
+              className="absolute top-2 left-2 z-50 flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-md hover:bg-white rounded-full transition-all text-[#3B82F6] font-bold text-[9px] shadow-md border border-white/40"
             >
               <ArrowLeft className="w-3 h-3" />
               <span>กลับไปหน้าค้นหา</span>
             </button>
 
             {/* Main Workflow Section - Centered */}
-            <div className="flex-1 flex flex-col items-center justify-center w-full py-4 sm:py-8 overflow-hidden">
-              <div className="w-full max-w-4xl flex flex-col items-center gap-6 sm:gap-10 relative">
+            <div className="flex-1 flex flex-col items-center justify-center w-full py-2 sm:py-8 overflow-hidden">
+              <div className="w-full max-w-4xl flex flex-col items-center gap-4 sm:gap-10 relative">
                 
                 {/* Row 1: Steps 1-3 */}
                 <div className="flex items-start justify-center gap-2 sm:gap-6 relative w-full px-4">
@@ -205,7 +205,7 @@ export default function App() {
                     <React.Fragment key={index}>
                       <Step step={step} index={index} globalIndex={index} />
                       {index < 2 && (
-                        <div className="flex items-center h-24 sm:h-40">
+                        <div className="flex items-center h-16 sm:h-40">
                           <div className={`h-[1px] sm:h-[1.5px] w-4 sm:w-16 rounded-full transition-all duration-500 ${
                             index < getCurrentStepIndex(result?.status) ? "bg-gradient-to-r from-[#6366F1] to-[#D946EF]" : "bg-gray-200/20"
                           }`} />
@@ -214,19 +214,19 @@ export default function App() {
                     </React.Fragment>
                   ))}
                   {/* S-Curve Connector: Row 1 to Row 2 */}
-                  <div className="absolute -bottom-6 right-[10%] sm:right-20 w-12 sm:w-24 h-6 border-r-[1px] border-b-[1px] border-dashed border-purple-300/30 rounded-br-[1.5rem] pointer-events-none"></div>
+                  <div className="absolute -bottom-4 right-[10%] sm:right-20 w-12 sm:w-24 h-4 border-r-[1px] border-b-[1px] border-dashed border-purple-300/30 rounded-br-[1rem] pointer-events-none"></div>
                 </div>
 
                 {/* Row 2: Steps 4-6 */}
-                <div className="flex items-start justify-center gap-2 sm:gap-6 relative mt-2 w-full px-4">
+                <div className="flex items-start justify-center gap-2 sm:gap-6 relative mt-1 w-full px-4">
                   {/* Connector from Row 1 */}
-                  <div className="absolute -top-6 left-[10%] sm:left-20 w-12 sm:w-24 h-6 border-l-[1px] border-t-[1px] border-dashed border-purple-300/30 rounded-tl-[1.5rem] translate-x-[-100%] pointer-events-none"></div>
+                  <div className="absolute -top-4 left-[10%] sm:left-20 w-12 sm:w-24 h-4 border-l-[1px] border-t-[1px] border-dashed border-purple-300/30 rounded-tl-[1rem] translate-x-[-100%] pointer-events-none"></div>
                   
                   {workflowSteps.slice(3, 6).map((step, index) => (
                     <React.Fragment key={index + 3}>
                       <Step step={step} index={index} globalIndex={index + 3} />
                       {index < 2 && (
-                        <div className="flex items-center h-24 sm:h-40">
+                        <div className="flex items-center h-16 sm:h-40">
                           <div className={`h-[1px] sm:h-[1.5px] w-4 sm:w-16 rounded-full transition-all duration-500 ${
                             (index + 3) < getCurrentStepIndex(result?.status) ? "bg-gradient-to-r from-[#6366F1] to-[#D946EF]" : "bg-gray-200/20"
                           }`} />
@@ -235,19 +235,19 @@ export default function App() {
                     </React.Fragment>
                   ))}
                   {/* S-Curve Connector: Row 2 to Row 3 */}
-                  <div className="absolute -bottom-6 right-[10%] sm:right-20 w-12 sm:w-24 h-6 border-r-[1px] border-b-[1px] border-dashed border-purple-300/30 rounded-br-[1.5rem] pointer-events-none"></div>
+                  <div className="absolute -bottom-4 right-[10%] sm:right-20 w-12 sm:w-24 h-4 border-r-[1px] border-b-[1px] border-dashed border-purple-300/30 rounded-br-[1rem] pointer-events-none"></div>
                 </div>
 
                 {/* Row 3: Steps 7-9 */}
-                <div className="flex items-start justify-center gap-2 sm:gap-6 relative mt-2 w-full px-4">
+                <div className="flex items-start justify-center gap-2 sm:gap-6 relative mt-1 w-full px-4">
                   {/* Connector from Row 2 */}
-                  <div className="absolute -top-6 left-[10%] sm:left-20 w-12 sm:w-24 h-6 border-l-[1px] border-t-[1px] border-dashed border-purple-300/30 rounded-tl-[1.5rem] translate-x-[-100%] pointer-events-none"></div>
+                  <div className="absolute -top-4 left-[10%] sm:left-20 w-12 sm:w-24 h-4 border-l-[1px] border-t-[1px] border-dashed border-purple-300/30 rounded-tl-[1rem] translate-x-[-100%] pointer-events-none"></div>
                   
                   {workflowSteps.slice(6, 9).map((step, index) => (
                     <React.Fragment key={index + 6}>
                       <Step step={step} index={index} globalIndex={index + 6} />
                       {index < 2 && (
-                        <div className="flex items-center h-24 sm:h-40">
+                        <div className="flex items-center h-16 sm:h-40">
                           <div className={`h-[1px] sm:h-[1.5px] w-4 sm:w-16 rounded-full transition-all duration-500 ${
                             (index + 6) < getCurrentStepIndex(result?.status) ? "bg-gradient-to-r from-[#6366F1] to-[#D946EF]" : "bg-gray-200/20"
                           }`} />
@@ -263,47 +263,47 @@ export default function App() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-full bg-white/70 backdrop-blur-3xl border-t border-white/80 p-6 sm:p-8 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] text-gray-700 mt-auto backdrop-saturate-150"
+              className="w-full bg-white/70 backdrop-blur-3xl border-t border-white/80 p-4 sm:p-8 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] text-gray-700 mt-auto backdrop-saturate-150"
             >
-              <div className="max-w-xl mx-auto space-y-4">
-                <div className="flex flex-col gap-1">
-                  <p className="text-[9px] uppercase font-black text-blue-500 tracking-widest opacity-60">Project Details</p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
-                      <span className="text-[10px] text-gray-400 font-bold">PO NO:</span>
-                      <span className="font-black text-blue-600 text-sm">{result?.poNo}</span>
+              <div className="max-w-xl mx-auto space-y-2">
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[8px] uppercase font-black text-blue-500 tracking-widest opacity-60">Project Details</p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                      <span className="text-[9px] text-gray-400 font-bold">PO NO:</span>
+                      <span className="font-black text-blue-600 text-xs">{result?.poNo}</span>
                     </div>
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
-                      <span className="text-[10px] text-gray-400 font-bold">บริษัท:</span>
-                      <span className="font-bold text-gray-800 text-sm">{result?.supplier}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <p className="text-[9px] uppercase font-black text-purple-500 tracking-widest opacity-60">Contract Info</p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
-                      <span className="text-[10px] text-gray-400 font-bold">เลขบิดดิ้ง:</span>
-                      <span className="font-bold text-gray-700 text-xs">{result?.orderId}</span>
-                    </div>
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
-                      <span className="text-[10px] text-gray-400 font-bold">เลขที่สัญญา:</span>
-                      <span className="font-bold text-gray-700 text-xs">{result?.contractId}</span>
-                    </div>
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-2">
-                      <span className="text-[10px] text-gray-400 font-bold">คลังพัสดุ:</span>
-                      <span className="font-bold text-gray-700 text-xs">{result?.location}</span>
+                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                      <span className="text-[9px] text-gray-400 font-bold">บริษัท:</span>
+                      <span className="font-bold text-gray-800 text-xs">{result?.supplier}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 flex flex-col gap-3">
-                  <div className="flex items-center gap-3 text-blue-500 font-bold text-xs bg-blue-50/50 p-3 rounded-2xl border border-blue-100/50">
-                    <Phone className="w-4 h-4" />
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[8px] uppercase font-black text-purple-500 tracking-widest opacity-60">Contract Info</p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                      <span className="text-[9px] text-gray-400 font-bold">เลขบิดดิ้ง:</span>
+                      <span className="font-bold text-gray-700 text-[10px]">{result?.orderId}</span>
+                    </div>
+                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                      <span className="text-[9px] text-gray-400 font-bold">เลขที่สัญญา:</span>
+                      <span className="font-bold text-gray-700 text-[10px]">{result?.contractId}</span>
+                    </div>
+                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                      <span className="text-[9px] text-gray-400 font-bold">คลังพัสดุ:</span>
+                      <span className="font-bold text-gray-700 text-[10px]">{result?.location}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-blue-500 font-bold text-[10px] bg-blue-50/50 p-2 rounded-xl border border-blue-100/50">
+                    <Phone className="w-3.5 h-3.5" />
                     <span className="tracking-tight">ติดต่อ: 038-455280 ต่อ 10426</span>
                   </div>
-                  <div className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl text-white text-center text-[10px] uppercase tracking-widest font-black shadow-lg shadow-blue-500/20">
+                  <div className="w-full py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl text-white text-center text-[9px] uppercase tracking-widest font-black shadow-lg shadow-blue-500/20">
                     Status: {result?.status || "In Progress"}
                   </div>
                 </div>
