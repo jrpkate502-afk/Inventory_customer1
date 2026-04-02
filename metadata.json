@@ -1,0 +1,5 @@
+{
+  "name": "PO Search App",
+  "description": "A modern, minimal app to search and view PO status from Google Sheets.",
+  "requestFramePermissions": []
+}
