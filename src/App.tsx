@@ -125,7 +125,7 @@ export default function App() {
             <h1 className="text-6xl sm:text-9xl font-black mb-2 bg-gradient-to-r from-[#6366F1] to-[#D946EF] bg-clip-text text-transparent py-2 tracking-tighter">
               Search
             </h1>
-            <p className="text-gray-500 mb-6 text-xl sm:text-2xl font-bold tracking-tight">ค้นหาหมายเลข PO</p>
+            <p className="text-gray-500 mb-6 text-xl sm:text-2xl font-bold tracking-tight">ค้นหาสถานะงานจัดซื้อ</p>
             
             <div className="relative group max-w-4xl mx-auto">
               <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
