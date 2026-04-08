@@ -30,13 +30,13 @@ export default function App() {
     return index !== -1 ? index : 4;
   };
 
-  const handleSearch = async (query: string = searchQuery) => {
+  const handleSearch = async (query: string, type: "po" | "egp" = "po") => {
     if (!query.trim()) return;
     
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchPOData(query);
+      const data = await fetchPOData(query, type);
       if (data) {
         setResult(data);
         setView("result");
@@ -56,25 +56,25 @@ export default function App() {
     const isPast = globalIndex < currentStepIndex;
 
     return (
-      <div className={`flex flex-col items-center gap-2 w-[28%] min-w-[90px] max-w-[140px] relative transition-opacity duration-500 ${!isCurrent ? "opacity-40 grayscale-[0.2]" : "opacity-100"}`}>
+      <div className={`flex flex-col items-center gap-1.5 w-[28%] min-w-[80px] max-w-[120px] relative transition-opacity duration-500 ${!isCurrent ? "opacity-40 grayscale-[0.2]" : "opacity-100"}`}>
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: globalIndex * 0.05 }}
-          className={`relative p-3 sm:p-5 rounded-[1.8rem] sm:rounded-[2.2rem] w-full aspect-square flex flex-col items-center justify-center transition-all duration-500 border ${
+          className={`relative p-2.5 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] w-full aspect-square flex flex-col items-center justify-center transition-all duration-500 border ${
             isCurrent
-              ? "bg-gradient-to-br from-[#6366F1] to-[#D946EF] shadow-[0_0_40px_rgba(168,85,247,0.6)] text-white border-transparent scale-110 z-20"
+              ? "bg-gradient-to-br from-[#6366F1] to-[#D946EF] shadow-[0_0_30px_rgba(168,85,247,0.5)] text-white border-transparent scale-110 z-20"
               : "bg-white/40 backdrop-blur-md border-white/60 text-gray-400 shadow-sm"
           }`}
         >
           {/* Checkmark for completed steps */}
           {isPast && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-7 sm:h-7 bg-green-400 rounded-full flex items-center justify-center text-white shadow-md z-30 border-2 border-white">
-              <Check className="w-3 h-3 sm:w-4 sm:h-4 stroke-[3]" />
+            <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-400 rounded-full flex items-center justify-center text-white shadow-md z-30 border-2 border-white">
+              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" />
             </div>
           )}
 
-          <div className={`w-12 h-12 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden mb-2 flex items-center justify-center shadow-inner ${isCurrent ? "bg-white/20" : "bg-gray-200/30"}`}>
+          <div className={`w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden mb-1.5 flex items-center justify-center shadow-inner ${isCurrent ? "bg-white/20" : "bg-gray-200/30"}`}>
             <img
               src={step.image}
               alt={step.title}
@@ -87,10 +87,15 @@ export default function App() {
           </div>
           
           <div className="flex flex-col items-center">
-            <span className={`text-[7px] sm:text-[9px] font-black mb-0.5 opacity-60 ${isCurrent ? "text-white" : "text-gray-500"}`}>STEP {globalIndex + 1}</span>
-            <p className={`text-center text-[9px] sm:text-[11px] font-bold leading-tight px-0.5 ${isCurrent ? "text-white" : "text-gray-600"}`}>
+            <span className={`text-[6px] sm:text-[8px] font-black mb-0.5 opacity-60 ${isCurrent ? "text-white" : "text-gray-500"}`}>STEP {globalIndex + 1}</span>
+            <p className={`text-center text-[8px] sm:text-[10px] font-bold leading-tight px-0.5 ${isCurrent ? "text-white" : "text-gray-600"}`}>
               {step.title}
             </p>
+            {globalIndex === 0 && result?.announcementDate && (
+              <p className={`text-[6px] sm:text-[7px] mt-0.5 font-medium ${isCurrent ? "text-white/80" : "text-gray-400"}`}>
+                {result.announcementDate}
+              </p>
+            )}
           </div>
         </motion.div>
 
@@ -98,7 +103,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, y: 3 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`p-1.5 rounded-lg w-full text-[7px] sm:text-[9px] text-center transition-all duration-500 border ${
+            className={`p-1 rounded-lg w-full text-[7px] sm:text-[9px] text-center transition-all duration-500 border ${
               isCurrent
                 ? "bg-[#6366F1] shadow-md text-white border-transparent font-bold"
                 : "bg-white/20 text-gray-400 border-white/10"
@@ -127,48 +132,52 @@ export default function App() {
             </h1>
             <p className="text-gray-500 mb-6 text-xl sm:text-2xl font-bold tracking-tight">ค้นหาสถานะงานจัดซื้อ</p>
             
-            <div className="relative group max-w-4xl mx-auto">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <Search className="w-5 h-5 text-gray-400" />
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {/* PO Search */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                  <Search className="w-5 h-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery, "po")}
+                  placeholder="ค้นหา PO เช่น 300xxxxxxxx"
+                  className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
+                />
+                <button
+                  onClick={() => handleSearch(searchQuery, "po")}
+                  disabled={loading}
+                  className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
+                </button>
               </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
-                placeholder="ค้นหา PO เช่น 300xxxxxxxx"
-                className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
-              />
-              <button
-                onClick={() => handleSearch(searchQuery)}
-                disabled={loading}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
-              </button>
+
+              {/* e-GP Search (Matching the image) */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                  <Search className="w-5 h-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={egpSearchQuery}
+                  onChange={(e) => setEgpSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch(egpSearchQuery, "egp")}
+                  placeholder="ค้นหาหมายเลขโครงการ e-GP"
+                  className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-purple-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
+                />
+                <button
+                  onClick={() => handleSearch(egpSearchQuery, "egp")}
+                  disabled={loading}
+                  className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-[#A855F7] hover:bg-[#9333EA] disabled:bg-purple-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
+                </button>
+              </div>
             </div>
 
-            <div className="relative group max-w-4xl mx-auto mt-4 sm:mt-10">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <Search className="w-5 h-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                value={egpSearchQuery}
-                onChange={(e) => setEgpSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch(egpSearchQuery)}
-                placeholder="ค้นหาหมายเลขโครงการ e-GP"
-                className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-purple-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
-              />
-              <button
-                onClick={() => handleSearch(egpSearchQuery)}
-                disabled={loading}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
-              </button>
-            </div>
-            
             {error && (
               <motion.p
                 initial={{ opacity: 0 }}
@@ -259,7 +268,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Footer Project Info Panel (Full Width Vertical List) */}
+            {/* Footer Project Info Panel */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -269,34 +278,61 @@ export default function App() {
                 <div className="flex flex-col gap-0.5">
                   <p className="text-[8px] uppercase font-black text-blue-500 tracking-widest opacity-60">Project Details</p>
                   <div className="space-y-1">
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                      <span className="text-[9px] text-gray-400 font-bold">PO NO:</span>
-                      <span className="font-black text-blue-600 text-xs">{result?.poNo}</span>
-                    </div>
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                      <span className="text-[9px] text-gray-400 font-bold">บริษัท:</span>
-                      <span className="font-bold text-gray-800 text-xs">{result?.supplier}</span>
-                    </div>
+                    {result?.poNo ? (
+                      <>
+                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                          <span className="text-[9px] text-gray-400 font-bold">PO NO:</span>
+                          <span className="font-black text-blue-600 text-xs">{result.poNo}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                          <span className="text-[9px] text-gray-400 font-bold">บริษัท:</span>
+                          <span className="font-bold text-gray-800 text-xs">{result.supplier}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                          <span className="text-[9px] text-gray-400 font-bold">เลขบิด:</span>
+                          <span className="font-black text-blue-600 text-xs">{result?.bidNo}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                          <span className="text-[9px] text-gray-400 font-bold">หมายเลขโครงการ e-GP:</span>
+                          <span className="font-bold text-gray-800 text-xs">{result?.egp}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                          <span className="text-[9px] text-gray-400 font-bold">วิธีการจัดซื้อ:</span>
+                          <span className="font-bold text-gray-800 text-xs">{result?.howTo}</span>
+                        </div>
+                        {result?.announcementDate && (
+                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                            <span className="text-[9px] text-gray-400 font-bold">วันที่ประกาศผลผู้ชนะ:</span>
+                            <span className="font-bold text-gray-800 text-xs">{result.announcementDate}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-[8px] uppercase font-black text-purple-500 tracking-widest opacity-60">Contract Info</p>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                      <span className="text-[9px] text-gray-400 font-bold">เลขบิดดิ้ง:</span>
-                      <span className="font-bold text-gray-700 text-[10px]">{result?.orderId}</span>
-                    </div>
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                      <span className="text-[9px] text-gray-400 font-bold">เลขที่สัญญา:</span>
-                      <span className="font-bold text-gray-700 text-[10px]">{result?.contractId}</span>
-                    </div>
-                    <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                      <span className="text-[9px] text-gray-400 font-bold">คลังพัสดุ:</span>
-                      <span className="font-bold text-gray-700 text-[10px]">{result?.location}</span>
+                {result?.poNo && (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[8px] uppercase font-black text-purple-500 tracking-widest opacity-60">Contract Info</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                        <span className="text-[9px] text-gray-400 font-bold">เลขบิดดิ้ง:</span>
+                        <span className="font-bold text-gray-700 text-[10px]">{result.orderId}</span>
+                      </div>
+                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                        <span className="text-[9px] text-gray-400 font-bold">เลขที่สัญญา:</span>
+                        <span className="font-bold text-gray-700 text-[10px]">{result.contractId}</span>
+                      </div>
+                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                        <span className="text-[9px] text-gray-400 font-bold">คลังพัสดุ:</span>
+                        <span className="font-bold text-gray-700 text-[10px]">{result.location}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="pt-2 flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-blue-500 font-bold text-[10px] bg-blue-50/50 p-2 rounded-xl border border-blue-100/50">

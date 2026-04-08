@@ -1,10 +1,12 @@
 import { POData } from "../types";
 
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/103dALwyztqHunKjVxOggzXcCvywd3lUaBUh9SS9I_WU/export?format=csv";
+const PO_SHEET_URL = "https://docs.google.com/spreadsheets/d/103dALwyztqHunKjVxOggzXcCvywd3lUaBUh9SS9I_WU/export?format=csv";
+const EGP_SHEET_URL = "https://docs.google.com/spreadsheets/d/1vi9Zy43Vc0nk02Steu87DiS7TG8wVSU_gYJwdUTCnos/export?format=csv";
 
-export async function fetchPOData(poNumber: string): Promise<POData | null> {
+export async function fetchPOData(query: string, type: "po" | "egp" = "po"): Promise<POData | null> {
   try {
-    const response = await fetch(SHEET_URL);
+    const url = type === "po" ? PO_SHEET_URL : EGP_SHEET_URL;
+    const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch data");
     
     const csvText = await response.text();
@@ -14,51 +16,60 @@ export async function fetchPOData(poNumber: string): Promise<POData | null> {
     
     const headers = rows[0];
     
-    // Find column indices based on headers
-    // Mapping:
-    // PO NO: "หมายเลข PO"
-    // ชื่อบริษัท (Supplier): "ชื่อบริษัท"
-    // เลขที่จัดซื้อ (Order ID): "เลขที่จัดซื้อ"
-    // เลขที่สัญญา (Contract ID): "เลขที่สัญญา"
-    // คลังพัสดุ (Location): "คลังพัสดุ"
-    // สถานะ (Status): "สถานะ" (Assuming there's a status column)
-    
-    // Mapping based on user request and image.png:
-    // Column A: state -> Status button
-    // Column B: bidding_number -> เลขบิดดิ้ง
-    // Column C: company -> ชื่อบริษัท
-    // Column D: contract_number -> เลขที่สัญญา
-    // Column E: po_number -> PO NO: (Search Key)
-    // Column F: ba -> คลังพัสดุ (BA)
-    
-    const poIndex = headers.findIndex(h => h.trim() === "po_number");
-    const supplierIndex = headers.findIndex(h => h.trim() === "company");
-    const biddingIndex = headers.findIndex(h => h.trim() === "bidding_number");
-    const contractIdIndex = headers.findIndex(h => h.trim() === "contract_number");
-    const locationIndex = headers.findIndex(h => h.trim() === "ba");
-    const statusIndex = headers.findIndex(h => h.trim() === "state");
+    if (type === "po") {
+      const poIndex = headers.findIndex(h => h.trim() === "po_number");
+      const supplierIndex = headers.findIndex(h => h.trim() === "company");
+      const biddingIndex = headers.findIndex(h => h.trim() === "bidding_number");
+      const contractIdIndex = headers.findIndex(h => h.trim() === "contract_number");
+      const locationIndex = headers.findIndex(h => h.trim() === "ba");
+      const statusIndex = headers.findIndex(h => h.trim() === "state");
 
-    // Search for the row with the matching PO number (Column E)
-    const dataRow = rows.slice(1).find(row => {
-      const val = row[poIndex]?.trim();
-      return val === poNumber.trim();
-    });
-    
-    if (!dataRow) return null;
-    
-    const result = {
-      poNo: dataRow[poIndex] || "",
-      supplier: dataRow[supplierIndex] || "",
-      orderId: dataRow[biddingIndex] || "", // Using bidding_number for the bidding field
-      contractId: dataRow[contractIdIndex] || "",
-      location: dataRow[locationIndex] || "",
-      status: dataRow[statusIndex] || "บริษัทส่งของแล้ว",
-    };
+      const dataRow = rows.slice(1).find(row => {
+        const val = row[poIndex]?.trim();
+        return val === query.trim();
+      });
+      
+      if (!dataRow) return null;
+      
+      return {
+        poNo: dataRow[poIndex] || "",
+        supplier: dataRow[supplierIndex] || "",
+        orderId: dataRow[biddingIndex] || "",
+        contractId: dataRow[contractIdIndex] || "",
+        location: dataRow[locationIndex] || "",
+        status: dataRow[statusIndex] || "บริษัทส่งของแล้ว",
+      };
+    } else {
+      // e-GP Mapping:
+      // Bid No. (Col A) -> เลขบิด
+      // e_GP (Col B) -> หมายเลขโครงการ e-GP
+      // How_to (Col C) -> วิธีการจัดซื้อ
+      // วันที่ประกาศผล (Col D) -> วันที่ประกาศผลผู้ชนะ
+      // Winner_Announcement (Col E) -> Current Status
+      
+      const bidNoIndex = headers.findIndex(h => h.trim() === "Bid No.");
+      const egpIndex = headers.findIndex(h => h.trim() === "e_GP");
+      const howToIndex = headers.findIndex(h => h.trim() === "How_to");
+      const announcementDateIndex = headers.findIndex(h => h.trim() === "วันที่ประกาศผล");
+      const statusIndex = headers.findIndex(h => h.trim() === "สถานะ" || h.trim() === "Winner_Announcement");
 
-    console.log("Fetched PO Data:", result);
-    return result;
+      const dataRow = rows.slice(1).find(row => {
+        const val = row[egpIndex]?.trim();
+        return val === query.trim();
+      });
+      
+      if (!dataRow) return null;
+      
+      return {
+        bidNo: dataRow[bidNoIndex] || "",
+        egp: dataRow[egpIndex] || "",
+        howTo: dataRow[howToIndex] || "",
+        announcementDate: dataRow[announcementDateIndex] || "",
+        status: dataRow[statusIndex] || "ประกาศผู้ชนะ",
+      };
+    }
   } catch (error) {
-    console.error("Error fetching PO data:", error);
+    console.error("Error fetching data:", error);
     return null;
   }
 }
