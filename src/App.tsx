@@ -197,7 +197,11 @@ export default function App() {
             className="w-full max-w-7xl relative flex flex-col items-center min-h-screen py-4 sm:py-12 px-4"
           >
             <button
-              onClick={() => setView("search")}
+              onClick={() => {
+                setView("search");
+                setSearchQuery("");
+                setEgpSearchQuery("");
+              }}
               className="absolute top-2 left-2 z-50 flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-md hover:bg-white rounded-full transition-all text-[#3B82F6] font-bold text-[9px] shadow-md border border-white/40"
             >
               <ArrowLeft className="w-3 h-3" />
