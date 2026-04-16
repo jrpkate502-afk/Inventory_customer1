@@ -3,6 +3,7 @@ import { Search, Phone, ArrowLeft, Loader2, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { fetchPOData } from "./services/googleSheetService";
 import { POData } from "./types";
+import { parseThaiDate, addThaiWorkingDays } from "./services/dateUtils";
 
 export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,28 +134,6 @@ export default function App() {
             <p className="text-gray-500 mb-6 text-xl sm:text-2xl font-bold tracking-tight">ค้นหาสถานะงานจัดซื้อ</p>
             
             <div className="space-y-4 max-w-4xl mx-auto">
-              {/* PO Search */}
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                  <Search className="w-5 h-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery, "po")}
-                  placeholder="ค้นหา PO เช่น 300xxxxxxxx"
-                  className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
-                />
-                <button
-                  onClick={() => handleSearch(searchQuery, "po")}
-                  disabled={loading}
-                  className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
-                </button>
-              </div>
-
               {/* e-GP Search (Matching the image) */}
               <div className="relative group">
                 <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
@@ -172,6 +151,28 @@ export default function App() {
                   onClick={() => handleSearch(egpSearchQuery, "egp")}
                   disabled={loading}
                   className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-[#A855F7] hover:bg-[#9333EA] disabled:bg-purple-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
+                </button>
+              </div>
+
+              {/* PO Search */}
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                  <Search className="w-5 h-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery, "po")}
+                  placeholder="ค้นหา PO เช่น 300xxxxxxxx"
+                  className="w-full pl-12 pr-24 py-3 sm:py-5 bg-white rounded-full shadow-xl border-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700 placeholder:text-gray-600/30 text-lg sm:text-2xl font-light"
+                />
+                <button
+                  onClick={() => handleSearch(searchQuery, "po")}
+                  disabled={loading}
+                  className="absolute right-1.5 top-1.5 bottom-1.5 px-6 sm:px-8 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-full font-normal transition-all flex items-center justify-center min-w-[80px] sm:min-w-[120px] text-base sm:text-xl"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
                 </button>
@@ -308,10 +309,34 @@ export default function App() {
                           <span className="font-bold text-gray-800 text-xs">{result?.howTo}</span>
                         </div>
                         {result?.announcementDate && (
-                          <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                            <span className="text-[9px] text-gray-400 font-bold">วันที่ประกาศผลผู้ชนะ:</span>
-                            <span className="font-bold text-gray-800 text-xs">{result.announcementDate}</span>
-                          </div>
+                          <>
+                            <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
+                              <span className="text-[9px] text-gray-400 font-bold">วันที่ประกาศผลผู้ชนะ:</span>
+                              <span className="font-bold text-gray-800 text-xs">{result.announcementDate}</span>
+                            </div>
+                            {(() => {
+                              const startDate = parseThaiDate(result.announcementDate);
+                              if (startDate) {
+                                const appealEndDate = addThaiWorkingDays(startDate, 7);
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                if (today > appealEndDate) {
+                                  return (
+                                    <div className="flex justify-end pt-0.5">
+                                      <span className="text-[10px] font-black text-green-600">ล่วงพ้นระยะเวลาอุทธรณ์แล้ว</span>
+                                    </div>
+                                  );
+                                } else {
+                                  return (
+                                    <div className="flex justify-end pt-0.5">
+                                      <span className="text-[10px] font-black text-blue-600">อยู่ในระยะเวลาอุทธรณ์</span>
+                                    </div>
+                                  );
+                                }
+                              }
+                              return null;
+                            })()}
+                          </>
                         )}
                       </>
                     )}
