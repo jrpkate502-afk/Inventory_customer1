@@ -26,8 +26,12 @@ export default function App() {
   ];
 
   const getCurrentStepIndex = (status?: string) => {
-    if (!status) return 4; // Default to "บริษัทส่งของแล้ว" for demo
-    const index = workflowSteps.findIndex(step => step.title === status);
+    if (!status) return 0; 
+    const index = workflowSteps.findIndex(step => 
+       status.includes(step.title) || step.title.includes(status)
+    );
+    // If we've reached the final step "เบิกจ่าย", treat it as completed
+    if (index === 8) return 9;
     return index !== -1 ? index : 4;
   };
 
@@ -57,25 +61,41 @@ export default function App() {
     const isPast = globalIndex < currentStepIndex;
 
     return (
-      <div className={`flex flex-col items-center gap-1.5 w-[28%] min-w-[80px] max-w-[120px] relative transition-opacity duration-500 ${!isCurrent ? "opacity-40 grayscale-[0.2]" : "opacity-100"}`}>
+      <div className={`flex flex-col items-center gap-1.5 w-[30%] sm:w-[28%] min-w-[85px] max-w-[130px] relative transition-all duration-500 ${!isCurrent && !isPast ? "opacity-40 grayscale-[0.8]" : "opacity-100"}`}>
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: globalIndex * 0.05 }}
+          animate={{ opacity: 1, scale: isCurrent ? 1.1 : 1 }}
+          transition={{ 
+            type: "spring",
+            stiffness: 300,
+            damping: 20,
+            delay: globalIndex * 0.05 
+          }}
           className={`relative p-2.5 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] w-full aspect-square flex flex-col items-center justify-center transition-all duration-500 border ${
             isCurrent
-              ? "bg-gradient-to-br from-[#6366F1] to-[#D946EF] shadow-[0_0_30px_rgba(168,85,247,0.5)] text-white border-transparent scale-110 z-20"
-              : "bg-white/40 backdrop-blur-md border-white/60 text-gray-400 shadow-sm"
+              ? "bg-gradient-to-br from-[#6366F1] to-[#D946EF] shadow-[0_0_40px_rgba(168,85,247,0.6)] text-white border-transparent z-20"
+              : isPast 
+                ? "bg-white/90 backdrop-blur-md border-green-300 text-gray-700 shadow-sm"
+                : "bg-white/40 backdrop-blur-md border-white/60 text-gray-400 shadow-sm"
           }`}
         >
+          {/* Status Label Box */}
+          <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[6px] sm:text-[8px] font-black uppercase tracking-tighter whitespace-nowrap shadow-sm z-40 border ${
+            isCurrent ? "bg-white text-purple-600 border-purple-100 animate-pulse" :
+            isPast ? "bg-green-500 text-white border-green-600" : 
+            "bg-gray-200 text-gray-500 border-gray-300"
+          }`}>
+            {isCurrent ? "กำลังดำเนินการ" : isPast ? "เสร็จสิ้น" : "รอดำเนินการ"}
+          </div>
+
           {/* Checkmark for completed steps */}
           {isPast && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-400 rounded-full flex items-center justify-center text-white shadow-md z-30 border-2 border-white">
-              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" />
+            <div className="absolute top-1 right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg z-30 border-2 border-white scale-90 sm:scale-100">
+              <Check className="w-3 h-3 stroke-[3]" />
             </div>
           )}
 
-          <div className={`w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden mb-1.5 flex items-center justify-center shadow-inner ${isCurrent ? "bg-white/20" : "bg-gray-200/30"}`}>
+          <div className={`w-8 h-8 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden mb-1 flex items-center justify-center shadow-inner ${isCurrent ? "bg-white/20" : "bg-gray-200/30"}`}>
             <img
               src={step.image}
               alt={step.title}
@@ -88,31 +108,17 @@ export default function App() {
           </div>
           
           <div className="flex flex-col items-center">
-            <span className={`text-[6px] sm:text-[8px] font-black mb-0.5 opacity-60 ${isCurrent ? "text-white" : "text-gray-500"}`}>STEP {globalIndex + 1}</span>
-            <p className={`text-center text-[8px] sm:text-[10px] font-bold leading-tight px-0.5 ${isCurrent ? "text-white" : "text-gray-600"}`}>
+            <span className={`text-[5px] sm:text-[7px] font-black mb-0 opacity-60 ${isCurrent ? "text-white" : "text-gray-500"}`}>STEP {globalIndex + 1}</span>
+            <p className={`text-center text-[7px] sm:text-[9px] font-extrabold leading-tight px-0.5 ${isCurrent ? "text-white" : "text-gray-800"}`}>
               {step.title}
             </p>
-            {globalIndex === 0 && result?.announcementDate && (
-              <p className={`text-[6px] sm:text-[7px] mt-0.5 font-medium ${isCurrent ? "text-white/80" : "text-gray-400"}`}>
+            {(isPast || isCurrent) && result?.announcementDate && (
+              <p className={`text-[6px] sm:text-[7px] mt-0.5 font-bold ${isCurrent ? "text-white/90" : "text-green-600/80"}`}>
                 {result.announcementDate}
               </p>
             )}
           </div>
         </motion.div>
-
-        {step.hasDetail && (
-          <motion.div
-            initial={{ opacity: 0, y: 3 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-1 rounded-lg w-full text-[7px] sm:text-[9px] text-center transition-all duration-500 border ${
-              isCurrent
-                ? "bg-[#6366F1] shadow-md text-white border-transparent font-bold"
-                : "bg-white/20 text-gray-400 border-white/10"
-            }`}
-          >
-            {isCurrent ? "กำลังดำเนินการ" : isPast ? <span className="text-gray-400">เสร็จสิ้น</span> : "รอดำเนินการ"}
-          </motion.div>
-        )}
       </div>
     );
   };
@@ -279,89 +285,96 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               className="w-full bg-white/70 backdrop-blur-3xl border-t border-white/80 p-4 sm:p-8 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] text-gray-700 mt-auto backdrop-saturate-150"
             >
-              <div className="max-w-xl mx-auto space-y-2">
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-[8px] uppercase font-black text-blue-500 tracking-widest opacity-60">Project Details</p>
-                  <div className="space-y-1">
-                    {result?.poNo ? (
-                      <>
-                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                          <span className="text-[9px] text-gray-400 font-bold">PO NO:</span>
-                          <span className="font-black text-blue-600 text-xs">{result.poNo}</span>
+              <div className="max-w-xl mx-auto space-y-3">
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] uppercase font-black text-blue-500 tracking-widest opacity-60">Project Details</p>
+                  <div className="space-y-1.5">
+                    {result?.poNo && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">PO NO:</span>
+                        <span className="font-black text-blue-600 text-[11px]">{result.poNo}</span>
+                      </div>
+                    )}
+                    {result?.supplier && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">บริษัท:</span>
+                        <span className="font-bold text-gray-800 text-[11px]">{result.supplier}</span>
+                      </div>
+                    )}
+                    {result?.bidNo && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">เลขบิด:</span>
+                        <span className="font-black text-blue-600 text-[11px]">{result.bidNo}</span>
+                      </div>
+                    )}
+                    {result?.egp && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">หมายเลขโครงการ e-GP:</span>
+                        <span className="font-bold text-gray-800 text-[11px]">{result.egp}</span>
+                      </div>
+                    )}
+                    {result?.howTo && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">วิธีการจัดซื้อ:</span>
+                        <span className="font-bold text-gray-800 text-[11px]">{result.howTo}</span>
+                      </div>
+                    )}
+                    {result?.announcementDate && (
+                      <div className="flex flex-col gap-1">
+                        <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                          <span className="text-[10px] text-gray-400 font-bold">วันที่ประกาศผลผู้ชนะ:</span>
+                          <span className="font-bold text-gray-800 text-[11px]">{result.announcementDate}</span>
                         </div>
-                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                          <span className="text-[9px] text-gray-400 font-bold">บริษัท:</span>
-                          <span className="font-bold text-gray-800 text-xs">{result.supplier}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                          <span className="text-[9px] text-gray-400 font-bold">เลขบิด:</span>
-                          <span className="font-black text-blue-600 text-xs">{result?.bidNo}</span>
-                        </div>
-                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                          <span className="text-[9px] text-gray-400 font-bold">หมายเลขโครงการ e-GP:</span>
-                          <span className="font-bold text-gray-800 text-xs">{result?.egp}</span>
-                        </div>
-                        <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                          <span className="text-[9px] text-gray-400 font-bold">วิธีการจัดซื้อ:</span>
-                          <span className="font-bold text-gray-800 text-xs">{result?.howTo}</span>
-                        </div>
-                        {result?.announcementDate && (
-                          <>
-                            <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                              <span className="text-[9px] text-gray-400 font-bold">วันที่ประกาศผลผู้ชนะ:</span>
-                              <span className="font-bold text-gray-800 text-xs">{result.announcementDate}</span>
-                            </div>
-                            {(() => {
-                              const startDate = parseThaiDate(result.announcementDate);
-                              if (startDate) {
-                                const appealEndDate = addThaiWorkingDays(startDate, 7);
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                if (today > appealEndDate) {
-                                  return (
-                                    <div className="flex justify-end pt-0.5">
-                                      <span className="text-[10px] font-black text-green-600">ล่วงพ้นระยะเวลาอุทธรณ์แล้ว</span>
-                                    </div>
-                                  );
-                                } else {
-                                  return (
-                                    <div className="flex justify-end pt-0.5">
-                                      <span className="text-[10px] font-black text-blue-600">อยู่ในระยะเวลาอุทธรณ์</span>
-                                    </div>
-                                  );
-                                }
-                              }
-                              return null;
-                            })()}
-                          </>
-                        )}
-                      </>
+                        {(() => {
+                          const startDate = parseThaiDate(result.announcementDate);
+                          if (startDate) {
+                            const appealEndDate = addThaiWorkingDays(startDate, 7);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            if (today > appealEndDate) {
+                              return (
+                                <div className="flex justify-end pt-0.5">
+                                  <span className="text-[10px] font-black text-green-600">ล่วงพ้นระยะเวลาอุทธรณ์แล้ว</span>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div className="flex justify-end pt-0.5">
+                                  <span className="text-[10px] font-black text-blue-600">อยู่ในระยะเวลาอุทธรณ์</span>
+                                </div>
+                              );
+                            }
+                          }
+                          return null;
+                        })()}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {result?.poNo && (
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-[8px] uppercase font-black text-purple-500 tracking-widest opacity-60">Contract Info</p>
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                        <span className="text-[9px] text-gray-400 font-bold">เลขบิดดิ้ง:</span>
-                        <span className="font-bold text-gray-700 text-[10px]">{result.orderId}</span>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] uppercase font-black text-purple-500 tracking-widest opacity-60">Contract & Logistical Info</p>
+                  <div className="space-y-1.5">
+                    {result?.orderId && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">เลขบิดดิ่ง:</span>
+                        <span className="font-bold text-gray-700 text-[11px]">{result.orderId}</span>
                       </div>
-                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                        <span className="text-[9px] text-gray-400 font-bold">เลขที่สัญญา:</span>
-                        <span className="font-bold text-gray-700 text-[10px]">{result.contractId}</span>
+                    )}
+                    {result?.contractId && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">เลขที่สัญญา:</span>
+                        <span className="font-bold text-gray-700 text-[11px]">{result.contractId}</span>
                       </div>
-                      <div className="flex justify-between items-baseline border-b border-gray-100 pb-1">
-                        <span className="text-[9px] text-gray-400 font-bold">คลังพัสดุ:</span>
-                        <span className="font-bold text-gray-700 text-[10px]">{result.location}</span>
+                    )}
+                    {result?.location && (
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
+                        <span className="text-[10px] text-gray-400 font-bold">คลังพัสดุ:</span>
+                        <span className="font-bold text-gray-700 text-[11px]">{result.location}</span>
                       </div>
-                    </div>
+                    )}
                   </div>
-                )}
+                </div>
 
                 <div className="pt-2 flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-blue-500 font-bold text-[10px] bg-blue-50/50 p-2 rounded-xl border border-blue-100/50">

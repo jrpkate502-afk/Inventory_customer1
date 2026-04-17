@@ -1,6 +1,6 @@
 import { POData } from "../types";
 
-const PO_SHEET_URL = "https://docs.google.com/spreadsheets/d/103dALwyztqHunKjVxOggzXcCvywd3lUaBUh9SS9I_WU/export?format=csv";
+const PO_SHEET_URL = "https://docs.google.com/spreadsheets/d/19pakZAhevWMbw42QZSe9H5llTMqKZ_p93rU--gBnQho/export?format=csv";
 const EGP_SHEET_URL = "https://docs.google.com/spreadsheets/d/1vi9Zy43Vc0nk02Steu87DiS7TG8wVSU_gYJwdUTCnos/export?format=csv";
 
 export async function fetchPOData(query: string, type: "po" | "egp" = "po"): Promise<POData | null> {
@@ -17,12 +17,22 @@ export async function fetchPOData(query: string, type: "po" | "egp" = "po"): Pro
     const headers = rows[0];
     
     if (type === "po") {
-      const poIndex = headers.findIndex(h => h.trim() === "po_number");
+      // Column Mapping based on description:
+      // Status (Col A) -> สถานะ
+      // Bidding No. (Col B) -> เลขบิด
+      // company (Col C) -> บริษัท
+      // Contract Number (Col D) -> เลขที่สัญญา
+      // PO_number (Col E) -> PO No.
+      // BA (Col F) -> คลังพัสดุ
+      // วันที่ประกาศผล (Likely Col G if not specified but needed)
+      
+      const poIndex = headers.findIndex(h => h.trim() === "PO_number");
       const supplierIndex = headers.findIndex(h => h.trim() === "company");
-      const biddingIndex = headers.findIndex(h => h.trim() === "bidding_number");
-      const contractIdIndex = headers.findIndex(h => h.trim() === "contract_number");
-      const locationIndex = headers.findIndex(h => h.trim() === "ba");
-      const statusIndex = headers.findIndex(h => h.trim() === "state");
+      const biddingIndex = headers.findIndex(h => h.trim() === "Bidding No.");
+      const contractIdIndex = headers.findIndex(h => h.trim() === "Contract Number");
+      const locationIndex = headers.findIndex(h => h.trim() === "BA");
+      const statusIndex = headers.findIndex(h => h.trim() === "Status");
+      const announcementDateIndex = headers.findIndex(h => h.trim() === "วันที่ประกาศผล");
 
       const dataRow = rows.slice(1).find(row => {
         const val = row[poIndex]?.trim();
@@ -38,6 +48,7 @@ export async function fetchPOData(query: string, type: "po" | "egp" = "po"): Pro
         contractId: dataRow[contractIdIndex] || "",
         location: dataRow[locationIndex] || "",
         status: dataRow[statusIndex] || "บริษัทส่งของแล้ว",
+        announcementDate: announcementDateIndex !== -1 ? dataRow[announcementDateIndex] || "" : "",
       };
     } else {
       // e-GP Mapping:
