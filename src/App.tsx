@@ -61,41 +61,30 @@ export default function App() {
     const isPast = globalIndex < currentStepIndex;
 
     return (
-      <div className={`flex flex-col items-center gap-1.5 w-[30%] sm:w-[28%] min-w-[85px] max-w-[130px] relative transition-all duration-500 ${!isCurrent && !isPast ? "opacity-40 grayscale-[0.8]" : "opacity-100"}`}>
+      <div className={`flex flex-col items-center gap-2 w-[30%] sm:w-[28%] min-w-[85px] max-w-[130px] relative transition-all duration-500 ${isCurrent ? "z-30 scale-110" : "opacity-40 grayscale-[0.8] scale-95"}`}>
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: isCurrent ? 1.1 : 1 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ 
             type: "spring",
             stiffness: 300,
             damping: 20,
             delay: globalIndex * 0.05 
           }}
-          className={`relative p-2.5 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] w-full aspect-square flex flex-col items-center justify-center transition-all duration-500 border ${
+          className={`relative p-3 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] w-full aspect-square flex flex-col items-center justify-center transition-all duration-500 border ${
             isCurrent
-              ? "bg-gradient-to-br from-[#6366F1] to-[#D946EF] shadow-[0_0_40px_rgba(168,85,247,0.6)] text-white border-transparent z-20"
-              : isPast 
-                ? "bg-white/90 backdrop-blur-md border-green-300 text-gray-700 shadow-sm"
-                : "bg-white/40 backdrop-blur-md border-white/60 text-gray-400 shadow-sm"
+              ? "bg-gradient-to-br from-[#6366F1] to-[#D946EF] shadow-[0_0_50px_rgba(168,85,247,0.7)] text-white border-transparent"
+              : "bg-white/50 backdrop-blur-md border-white/60 text-gray-400 shadow-sm"
           }`}
         >
-          {/* Status Label Box */}
-          <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[6px] sm:text-[8px] font-black uppercase tracking-tighter whitespace-nowrap shadow-sm z-40 border ${
-            isCurrent ? "bg-white text-purple-600 border-purple-100 animate-pulse" :
-            isPast ? "bg-green-500 text-white border-green-600" : 
-            "bg-gray-200 text-gray-500 border-gray-300"
-          }`}>
-            {isCurrent ? "กำลังดำเนินการ" : isPast ? "เสร็จสิ้น" : "รอดำเนินการ"}
-          </div>
-
-          {/* Checkmark for completed steps */}
+          {/* Checkmark icon - moved to be inside for active, but usually just a status marker */}
           {isPast && (
-            <div className="absolute top-1 right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg z-30 border-2 border-white scale-90 sm:scale-100">
-              <Check className="w-3 h-3 stroke-[3]" />
+            <div className="absolute top-2 right-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg z-30 border-2 border-white">
+              <Check className="w-3 h-3 stroke-[4]" />
             </div>
           )}
 
-          <div className={`w-8 h-8 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden mb-1 flex items-center justify-center shadow-inner ${isCurrent ? "bg-white/20" : "bg-gray-200/30"}`}>
+          <div className={`w-10 h-10 sm:w-16 sm:h-16 rounded-2xl overflow-hidden mb-2 flex items-center justify-center shadow-inner ${isCurrent ? "bg-white/20" : "bg-gray-200/30"}`}>
             <img
               src={step.image}
               alt={step.title}
@@ -108,17 +97,26 @@ export default function App() {
           </div>
           
           <div className="flex flex-col items-center">
-            <span className={`text-[5px] sm:text-[7px] font-black mb-0 opacity-60 ${isCurrent ? "text-white" : "text-gray-500"}`}>STEP {globalIndex + 1}</span>
-            <p className={`text-center text-[7px] sm:text-[9px] font-extrabold leading-tight px-0.5 ${isCurrent ? "text-white" : "text-gray-800"}`}>
+            <span className={`text-[5px] sm:text-[7px] font-black mb-0.5 opacity-60 ${isCurrent ? "text-white" : "text-gray-400"}`}>STEP {globalIndex + 1}</span>
+            <p className={`text-center text-[8px] sm:text-[10px] font-extrabold leading-tight px-0.5 ${isCurrent ? "text-white" : "text-gray-700"}`}>
               {step.title}
             </p>
             {(isPast || isCurrent) && result?.announcementDate && (
-              <p className={`text-[6px] sm:text-[7px] mt-0.5 font-bold ${isCurrent ? "text-white/90" : "text-green-600/80"}`}>
+              <p className={`text-[6px] sm:text-[8px] mt-1 font-bold ${isCurrent ? "text-white/90" : "text-gray-400"}`}>
                 {result.announcementDate}
               </p>
             )}
           </div>
         </motion.div>
+
+        {/* Status Label (Pill for active, Text for others) */}
+        <div className={`px-3 py-1 rounded-full text-[7px] sm:text-[9px] font-black uppercase tracking-tight transition-all duration-500 ${
+          isCurrent 
+            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg animate-pulse" 
+            : "text-gray-400 font-bold"
+        }`}>
+          {isCurrent ? "กำลังดำเนินการ" : isPast ? "เสร็จสิ้น" : "รอดำเนินการ"}
+        </div>
       </div>
     );
   };
