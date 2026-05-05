@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { Search, Phone, ArrowLeft, Loader2, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Phone, ArrowLeft, Loader2, Check, Users } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { fetchPOData } from "./services/googleSheetService";
 import { POData } from "./types";
 import { parseThaiDate, addThaiWorkingDays } from "./services/dateUtils";
+import { incrementVisitorCount, subscribeToVisitorCount } from "./services/visitorService";
 
 export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,6 +13,24 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"search" | "result">("search");
+  const [visitorCount, setVisitorCount] = useState<number>(0);
+
+  useEffect(() => {
+    // Only increment once per session to be "number of users" rather than "page views"
+    // However, simplest requirement "นับจำนวนผู้เข้าใช้งาน" is often just page views or unique sessions.
+    // We'll use a session flag.
+    const hasVisited = sessionStorage.getItem("hasVisited");
+    if (!hasVisited) {
+      incrementVisitorCount();
+      sessionStorage.setItem("hasVisited", "true");
+    }
+
+    const unsubscribe = subscribeToVisitorCount((count) => {
+      setVisitorCount(count);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const workflowSteps = [
     { title: "ประกาศผู้ชนะ", hasDetail: true, image: "https://lh3.googleusercontent.com/u/0/d/13qFq3xMHHRsJug75C4yzgFdfpjUdrBSn" },
@@ -122,7 +141,16 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] flex items-center justify-center p-4 font-sans overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] flex items-center justify-center p-4 font-sans overflow-hidden relative">
+      {/* Visitor Counter Box */}
+      <div className="absolute top-4 right-4 z-[60] bg-white/40 backdrop-blur-md border border-white/40 px-3 py-1.5 rounded-2xl flex items-center gap-2 shadow-sm">
+        <Users className="w-4 h-4 text-purple-600" />
+        <div className="flex flex-col">
+          <span className="text-[8px] uppercase font-black text-purple-500 tracking-widest opacity-60 leading-none">Visitors</span>
+          <span className="text-sm font-black text-gray-800 leading-none">{visitorCount.toLocaleString()}</span>
+        </div>
+      </div>
+
       <AnimatePresence mode="wait">
         {view === "search" ? (
           <motion.div
@@ -289,7 +317,7 @@ export default function App() {
                   <div className="space-y-1.5">
                     {result?.poNo && (
                       <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
-                        <span className="text-[10px] text-gray-400 font-bold">PO NO:</span>
+                        <span className="text-[10px] text-gray-400 font-bold">PO No.:</span>
                         <span className="font-black text-blue-600 text-[11px]">{result.poNo}</span>
                       </div>
                     )}
@@ -355,7 +383,7 @@ export default function App() {
                   <div className="space-y-1.5">
                     {result?.orderId && (
                       <div className="flex justify-between items-center border-b border-gray-100 pb-1.5">
-                        <span className="text-[10px] text-gray-400 font-bold">เลขบิดดิ่ง:</span>
+                        <span className="text-[10px] text-gray-400 font-bold">เลขบิด:</span>
                         <span className="font-bold text-gray-700 text-[11px]">{result.orderId}</span>
                       </div>
                     )}
@@ -380,7 +408,7 @@ export default function App() {
                     <span className="tracking-tight">ติดต่อ: 038-455280 ต่อ 10426</span>
                   </div>
                   <div className="w-full py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl text-white text-center text-[9px] uppercase tracking-widest font-black shadow-lg shadow-blue-500/20">
-                    Status: {result?.status || "In Progress"}
+                    สถานะ: {result?.status || "กำลังดำเนินการ"}
                   </div>
                 </div>
               </div>
