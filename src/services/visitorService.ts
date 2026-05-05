@@ -25,6 +25,8 @@ export const subscribeToVisitorCount = (callback: (count: number) => void) => {
   return onSnapshot(docRef, (doc) => {
     if (doc.exists()) {
       callback(doc.data().visitorCount || 0);
+    } else {
+      callback(0);
     }
   });
 };

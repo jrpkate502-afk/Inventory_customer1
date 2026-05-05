@@ -16,9 +16,6 @@ export default function App() {
   const [visitorCount, setVisitorCount] = useState<number>(0);
 
   useEffect(() => {
-    // Only increment once per session to be "number of users" rather than "page views"
-    // However, simplest requirement "นับจำนวนผู้เข้าใช้งาน" is often just page views or unique sessions.
-    // We'll use a session flag.
     const hasVisited = sessionStorage.getItem("hasVisited");
     if (!hasVisited) {
       incrementVisitorCount();
@@ -139,14 +136,12 @@ export default function App() {
       </div>
     );
   };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] flex items-center justify-center p-4 font-sans overflow-hidden relative">
+    <>
       {/* Global Visitor Counter Box */}
-      <motion.div 
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="fixed top-4 right-4 z-[100] bg-white/70 backdrop-blur-xl border border-white/60 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_40px_rgba(168,85,247,0.2)] transition-all group"
+      <div 
+        style={{ zIndex: 99999 }}
+        className="fixed top-4 right-4 bg-white border border-purple-200 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-[0_10px_40px_rgba(168,85,247,0.15)] hover:shadow-[0_10px_50px_rgba(168,85,247,0.25)] transition-all group"
       >
         <div className="relative">
           <Users className="w-5 h-5 text-purple-600 transition-transform group-hover:scale-110" />
@@ -157,18 +152,14 @@ export default function App() {
         </div>
         <div className="flex flex-col">
           <span className="text-[10px] uppercase font-black text-purple-500 tracking-[0.2em] opacity-80 leading-tight">Total Users</span>
-          <motion.span 
-            key={visitorCount}
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-lg font-black text-gray-900 leading-none tabular-nums"
-          >
-            {visitorCount.toLocaleString()}
-          </motion.span>
+          <span className="text-lg font-black text-gray-900 leading-none tabular-nums">
+            {(visitorCount || 0).toLocaleString()}
+          </span>
         </div>
-      </motion.div>
+      </div>
 
-      <AnimatePresence mode="wait">
+      <div className="min-h-screen bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] flex items-center justify-center p-4 font-sans overflow-hidden relative">
+        <AnimatePresence mode="wait">
         {view === "search" ? (
           <motion.div
             key="search"
@@ -434,5 +425,6 @@ export default function App() {
         )}
       </AnimatePresence>
     </div>
+    </>
   );
 }
