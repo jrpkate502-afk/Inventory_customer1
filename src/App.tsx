@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Search, Phone, ArrowLeft, Loader2, Check, Users } from "lucide-react";
+import { Search, Phone, ArrowLeft, Loader2, Check, Users, Lock, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { fetchPOData } from "./services/googleSheetService";
+import { authenticateUser } from "./services/authService";
 import { POData } from "./types";
 import { parseThaiDate, addThaiWorkingDays } from "./services/dateUtils";
 import { incrementVisitorCount, subscribeToVisitorCount } from "./services/visitorService";
@@ -14,6 +15,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"search" | "result">("search");
   const [visitorCount, setVisitorCount] = useState<number>(0);
+
+  const [currentUser, setCurrentUser] = useState<{ username: string; company: string } | null>(null);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     const hasVisited = sessionStorage.getItem("hasVisited");
@@ -136,8 +143,155 @@ export default function App() {
       </div>
     );
   };
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#E0F2FE] to-[#F3E8FF] flex items-center justify-center p-4 font-sans overflow-hidden relative">
+        {/* Global Visitor Counter Box */}
+        <div 
+          style={{ zIndex: 99999 }}
+          className="fixed top-4 right-4 bg-white border border-purple-200 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-[0_10px_40px_rgba(168,85,247,0.15)] hover:shadow-[0_10px_50px_rgba(168,85,247,0.25)] transition-all group"
+        >
+          <div className="relative">
+            <Users className="w-5 h-5 text-purple-600 transition-transform group-hover:scale-110" />
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-black text-purple-500 tracking-[0.2em] opacity-80 leading-tight">Total Users</span>
+            <span className="text-lg font-black text-gray-900 leading-none tabular-nums">
+              {(visitorCount || 0).toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Background Decorative Blobs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/20 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-300/20 blur-3xl pointer-events-none" />
+
+        <motion.div
+          key="login"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-white/80 backdrop-blur-2xl border border-white/60 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(168,85,247,0.15)] flex flex-col relative z-10"
+        >
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-tr from-[#6366F1] to-[#D946EF] rounded-3xl mx-auto mb-4 flex items-center justify-center text-white shadow-lg">
+              <Lock className="w-8 h-8" />
+            </div>
+            <h2 className="text-4xl font-black bg-gradient-to-r from-[#6366F1] to-[#D946EF] bg-clip-text text-transparent py-1 tracking-tight">
+              Sign In
+            </h2>
+            <p className="text-gray-500 font-bold text-sm mt-1">กรุณาเข้าสู่ระบบเพื่อค้นหาสถานะงานจัดซื้อ</p>
+          </div>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (loginLoading) return;
+              if (!loginUsername.trim() || !loginPassword.trim()) {
+                setLoginError("กรุณากรอก Username และ Password");
+                return;
+              }
+              setLoginLoading(true);
+              setLoginError(null);
+              try {
+                const user = await authenticateUser(loginUsername, loginPassword);
+                if (user) {
+                  setCurrentUser(user);
+                } else {
+                  setLoginError("Username หรือ Password ไม่ถูกต้อง");
+                }
+              } catch (err) {
+                setLoginError("เกิดข้อผิดพลาดในการเชื่อมต่อกรุณาลองใหม่");
+              } finally {
+                setLoginLoading(false);
+              }
+            }}
+            className="space-y-5"
+          >
+            <div className="space-y-1">
+              <label className="text-[11px] font-black uppercase text-purple-600 tracking-wider">Username</label>
+              <input
+                type="text"
+                value={loginUsername}
+                onChange={(e) => setLoginUsername(e.target.value)}
+                placeholder="Username"
+                className="w-full px-5 py-3.5 bg-white border border-purple-100 rounded-full shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all font-semibold text-gray-700"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] font-black uppercase text-purple-600 tracking-wider">Password</label>
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full px-5 py-3.5 bg-white border border-purple-100 rounded-full shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all font-semibold text-gray-700"
+              />
+            </div>
+
+            {loginError && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-3 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-2.5 text-red-500 text-xs font-bold"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                <span>{loginError}</span>
+              </motion.div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loginLoading}
+              className="w-full py-4 bg-gradient-to-r from-[#6366F1] to-[#D946EF] hover:brightness-105 active:scale-[0.98] disabled:opacity-50 text-white rounded-full font-black text-center transition-all shadow-lg hover:shadow-[0_8px_30px_rgba(168,85,247,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {loginLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <span>เข้าสู่ระบบ</span>
+              )}
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* Welcome [Company] Box */}
+      <div 
+        style={{ zIndex: 99999 }}
+        className="fixed top-4 left-4 bg-white border border-purple-200 px-4 py-2 rounded-2xl flex items-center gap-3 shadow-[0_10px_40px_rgba(168,85,247,0.15)] hover:shadow-[0_10px_50px_rgba(168,85,247,0.25)] transition-all group"
+      >
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-[#6366F1] to-[#D946EF] text-white shrink-0">
+          <Users className="w-4 h-4" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase font-black text-purple-500 tracking-[0.2em] opacity-80 leading-tight">Welcome</span>
+          <span className="text-sm font-black text-gray-800 leading-none">
+            {currentUser.company}
+          </span>
+        </div>
+        <button
+          onClick={() => {
+            setCurrentUser(null);
+            setLoginUsername("");
+            setLoginPassword("");
+            setLoginError(null);
+          }}
+          className="ml-2 hover:bg-red-50 p-1.5 rounded-lg text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+          title="Sign Out"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* Global Visitor Counter Box */}
       <div 
         style={{ zIndex: 99999 }}
